@@ -79,4 +79,29 @@ This project demonstrates how MCP enables:
 2. Tools to use LLMs for complex analysis.
 3. Prompt templates to guide LLM reasoning and tool use.
 
-This bidirectional integration showcases the full power of the Model Context Protocol. 
+This bidirectional integration showcases the full power of the Model Context Protocol.
+
+## New Diagnostic and Debug Tools
+
+We've added several new tools to help with diagnostics and debugging:
+
+### 1. Simple Testing Tools
+- `hello_world()`: A simple tool that returns a greeting to verify MCP is working.
+- `debug_info()`: Displays environment information, API key status, and file availability.
+
+### 2. Resilient Analysis Tools
+- `basic_messi_stats()`: Provides statistics without using external APIs.
+- Improved `goals_by_minute_range()`: Enhanced parsing of minute data to handle special cases.
+
+### 3. Error Handling
+- All tools now include proper error handling and meaningful error messages.
+- API-dependent tools gracefully handle failure cases.
+
+## Troubleshooting
+
+If you encounter timeout errors or issues with the MCP Inspector:
+
+1. Try the `debug_info()` tool to check your environment.
+2. Verify API keys are properly set in your `.env` file.
+3. Use the non-API tools like `basic_messi_stats()` if API calls are failing.
+4. Check network connectivity if API-dependent tools are timing out. 

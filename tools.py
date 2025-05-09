@@ -167,4 +167,80 @@ def analyze_data_with_gpt(query: str, category: Optional[str] = None) -> str:
     
     return response.choices[0].message.content
 
+@mcp.tool()
+def hello_world() -> str:
+    """A simple test tool to check if MCP is working."""
+    return "Hello from MCP! Everything is working."
+
+@mcp.tool()
+def debug_info() -> str:
+    """Get debug information about the environment."""
+    import sys
+    import platform
+    import os
+    
+    # Check if API keys are set (showing only first few chars for security)
+    openai_key = os.getenv("OPENAI_API_KEY", "Not set")
+    anthropic_key = os.getenv("ANTHROPIC_API_KEY", "Not set")
+    
+    if openai_key != "Not set":
+        openai_key = openai_key[:5] + "..." + openai_key[-4:]
+    
+    if anthropic_key != "Not set":
+        anthropic_key = anthropic_key[:5] + "..." + anthropic_key[-4:]
+    
+    csv_exists = os.path.exists("liomessidata.csv")
+    csv_size = os.path.getsize("liomessidata.csv") if csv_exists else 0
+    
+    info = {
+        "python_version": sys.version,
+        "platform": platform.platform(),
+        "csv_exists": csv_exists,
+        "csv_size_kb": csv_size / 1024,
+        "openai_key": openai_key,
+        "anthropic_key": anthropic_key,
+        "pwd": os.getcwd(),
+        "files_in_dir": os.listdir(".")[:10]  # First 10 files
+    }
+    
+    return str(info)
+
+@mcp.tool()
+def basic_messi_stats() -> str:
+    """Get basic statistics about Messi's goals without using external APIs."""
+    try:
+        df = pd.read_csv("liomessidata.csv")
+        
+        # Compile basic stats
+        total_goals = len(df)
+        competitions = df['Competition'].value_counts().to_dict()
+        seasons = df['Season'].value_counts().to_dict()
+        goal_types = df['Type'].value_counts().to_dict()
+        venues = df['Venue'].value_counts().to_dict()
+        
+        # Format the results nicely
+        result = "## Lionel Messi Goal Statistics\n\n"
+        result += f"**Total Goals:** {total_goals}\n\n"
+        
+        result += "### Goals by Competition\n"
+        for comp, count in sorted(competitions.items(), key=lambda x: x[1], reverse=True):
+            result += f"- {comp}: {count}\n"
+        
+        result += "\n### Goals by Season\n"
+        for season, count in sorted(seasons.items(), key=lambda x: x[1], reverse=True)[:10]:
+            result += f"- {season}: {count}\n"
+        
+        result += "\n### Goals by Type\n"
+        for gtype, count in sorted(goal_types.items(), key=lambda x: x[1], reverse=True):
+            if pd.notna(gtype) and gtype:
+                result += f"- {gtype}: {count}\n"
+        
+        result += "\n### Goals by Venue\n"
+        result += f"- Home: {venues.get('H', 0)}\n"
+        result += f"- Away: {venues.get('A', 0)}\n"
+        
+        return result
+    except Exception as e:
+        return f"Error generating Messi statistics: {str(e)}"
+
 # Add more tools as needed 
