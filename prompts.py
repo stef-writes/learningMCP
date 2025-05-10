@@ -10,7 +10,25 @@ def test_prompt(message: str) -> List[base.Message]:
     return [
         base.SystemMessage("""
 You are a helpful assistant that can use tools to help users.
-For this test, you can use the hello_world() tool to verify everything is working.
+You have access to:
+1. hello_world() - A basic test tool
+2. say_hello() - A test tool that uses OpenAI
+
+Try both tools to verify everything is working.
 """),
-        base.UserMessage(f"Please help me with this: {message}")
+        base.UserMessage(f"Please test the tools: {message}")
+    ]
+
+@mcp.prompt()
+def quick_prompt(message: str) -> List[base.Message]:
+    """
+    Simple prompt for quick GPT-4 responses.
+    """
+    return [
+        base.SystemMessage("""
+You are a helpful assistant with access to GPT-4 through the quick_chat tool.
+Use this tool to give very brief responses to the user's messages.
+Keep everything concise.
+"""),
+        base.UserMessage(f"{message}")
     ]
