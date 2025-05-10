@@ -1,0 +1,146 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "MCP Tool Call for Analytical Outline Generation",
+    "description": "Describes the data flow when a prompt triggers an LLM tool to generate an analytical outline.",
+    "type": "object",
+    "properties": {
+        "initiating_prompt": {
+            "description": "Details of the MCP prompt that starts the process.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "const": "get_problem_breakdown_outline"
+                },
+                "file_path": {
+                    "type": "string",
+                    "const": "prompts.py"
+                },
+                "input_arguments": {
+                    "type": "object",
+                    "properties": {
+                        "user_question": {
+                            "type": "string",
+                            "description": "The user's question for which an outline is needed.",
+                            "examples": ["How can a city reduce traffic congestion?"]
+                        }
+                    },
+                    "required": ["user_question"]
+                },
+                "system_message_to_agent": {
+                    "type": "string",
+                    "description": "The instruction given to the MCP agent (e.g., Inspector's LLM) to guide its behavior."
+                },
+                "user_message_to_agent_template": {
+                    "type": "string",
+                    "description": "The template for the user message passed to the agent, including the user's question."
+                }
+            },
+            "required": ["name", "file_path", "input_arguments", "system_message_to_agent", "user_message_to_agent_template"]
+        },
+        "mcp_agent_action": {
+            "description": "The action taken by the MCP agent based on the initiating prompt.",
+            "type": "object",
+            "properties": {
+                "decision": {
+                    "type": "string",
+                    "const": "Call a specific tool"
+                },
+                "selected_tool_name": {
+                    "type": "string",
+                    "const": "generate_analytical_outline"
+                },
+                "tool_input_parameters": {
+                    "type": "object",
+                    "description": "Parameters passed from the prompt/agent to the selected tool.",
+                    "properties": {
+                        "question": {
+                            "type": "string",
+                            "description": "The user_question from the prompt, now an input to the tool."
+                        }
+                    },
+                    "required": ["question"]
+                }
+            },
+            "required": ["decision", "selected_tool_name", "tool_input_parameters"]
+        },
+        "executed_tool": {
+            "description": "Details of the MCP tool that is executed.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "const": "generate_analytical_outline"
+                },
+                "file_path": {
+                    "type": "string",
+                    "const": "openai_tools.py"
+                },
+                "internal_llm_call": {
+                    "type": "object",
+                    "description": "Details of the OpenAI API call made by this tool.",
+                    "properties": {
+                        "model": {
+                            "type": "string",
+                            "const": "gpt-4o-mini"
+                        },
+                        "system_prompt_to_llm": {
+                            "type": "string",
+                            "description": "The system prompt defining the LLM's persona and task for outline generation."
+                        },
+                        "user_message_to_llm": {
+                            "type": "string",
+                            "description": "The user's question, framed for the LLM to generate an outline."
+                        },
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "temperature": {"type": "number"},
+                                "max_tokens": {"type": "integer"}
+                            }
+                        }
+                    },
+                    "required": ["model", "system_prompt_to_llm", "user_message_to_llm", "parameters"]
+                },
+                "output_type": {
+                    "type": "string",
+                    "description": "The type of the output returned by the tool (a string containing the outline)."
+                }
+            },
+            "required": ["name", "file_path", "internal_llm_call", "output_type"]
+        },
+        "final_output_to_user": {
+            "description": "The final structured outline presented to the user via the MCP agent.",
+            "type": "string",
+            "format": "markdown"
+        },
+        "data_logging": {
+            "description": "Details about how the interaction is logged.",
+            "type": "object",
+            "properties": {
+                "log_file": {
+                    "type": "string",
+                    "const": "mcp_interactions.log.json"
+                },
+                "log_entry_schema": {
+                    "type": "object",
+                    "properties": {
+                        "timestamp": {"type": "string", "format": "date-time"},
+                        "tool_name": {"type": "string"},
+                        "inputs": {"type": "object"},
+                        "output": {"type": ["string", "null"]},
+                        "error": {"type": ["string", "null"]}
+                    }
+                }
+            },
+            "required": ["log_file", "log_entry_schema"]
+        }
+    },
+    "required": [
+        "initiating_prompt",
+        "mcp_agent_action",
+        "executed_tool",
+        "final_output_to_user",
+        "data_logging"
+    ]
+} 
